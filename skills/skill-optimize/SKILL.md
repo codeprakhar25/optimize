@@ -1,6 +1,6 @@
 ---
 name: skill-optimize
-description: Audit installed CC skills by session history and prune unused ones via skillOverrides to cut per-turn token cost. Use when invoked as /skill-optimize, or user says "audit skills", "prune unused skills", "optimize skills", "too many skills", "reduce context".
+description: Audit CC skills by usage, prune dead ones via skillOverrides. Saves 8-12k tokens/turn. Use for /skill-optimize, "audit skills", "prune unused skills", "optimize skills", "too many skills".
 ---
 
 You are running the `skill-optimize` workflow. Follow these steps exactly. Do not skip steps.
@@ -101,9 +101,7 @@ On Cancel: stop.
 
 ## Step 5 — Phase 2: Plugin audit
 
-Only run this phase if `disableable_plugin_count > 0`.
-
-If `disableable_plugin_count == 0`: tell user "No fully-unused plugins found." Stop (or confirm skills-only result).
+Only run this phase if `disableable_plugin_count > 0`. If not, skip to Step 6.
 
 Show header:
 ```
@@ -137,20 +135,10 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/apply.py" \
 
 Print backup path and disabled count.
 
-## Step 6 — Final confirmation
+## Step 6 — Wrap up
 
-Print a clean summary of everything that was applied:
-```
-Done.
-  Backup: <backup_path>
-  Skill overrides written: <N> (<X> off, <Y> name-only)
-  Plugins disabled: <N>
-
-Restart Claude Code to apply changes.
-To undo: python3 "${CLAUDE_SKILL_DIR}/scripts/restore.py"
-```
-
-If nothing was applied (user skipped/cancelled everything), say so clearly.
+If nothing was applied across both phases: tell user so clearly.
+Otherwise: confirm everything is done, remind user to restart Claude Code.
 
 ## Rules
 
