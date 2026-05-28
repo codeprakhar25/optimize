@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "skill-optimize",
+  "description": "Prune unused Claude Code skills via skillOverrides to cut per-turn token costs.",
+  "owner": {
+    "name": "Prakhar Khatri",
+    "url": "https://github.com/prakharkhatri/skill-optimize"
+  },
+  "plugins": [
+    {
+      "name": "skill-optimize",
+      "description": "Audit installed CC skills and disable unused ones. Saves 8-12k tokens/turn on a typical install.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
