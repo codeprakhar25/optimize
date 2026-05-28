@@ -4,30 +4,28 @@ set -euo pipefail
 REPO="codeprakhar25/optimize"
 BRANCH="main"
 RAW="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
-INSTALL_DIR="${HOME}/.local/share/skill-optimize"
 SKILL_DIR="${HOME}/.claude/skills/skill-optimize"
 
 echo "Installing skill-optimize..."
 
-# create dirs
-mkdir -p "${INSTALL_DIR}/scripts"
-mkdir -p "${SKILL_DIR}"
+mkdir -p "${SKILL_DIR}/scripts"
 
-# download scripts
-for f in audit.py apply.py restore.py; do
-  curl -fsSL "${RAW}/scripts/${f}" -o "${INSTALL_DIR}/scripts/${f}"
-  chmod +x "${INSTALL_DIR}/scripts/${f}"
-done
-
-# download SKILL.md into ~/.claude/skills/
+# download SKILL.md
 curl -fsSL "${RAW}/skills/skill-optimize/SKILL.md" -o "${SKILL_DIR}/SKILL.md"
 
+# download scripts alongside SKILL.md so \${CLAUDE_SKILL_DIR}/scripts/ resolves correctly
+for f in audit.py apply.py restore.py; do
+  curl -fsSL "${RAW}/scripts/${f}" -o "${SKILL_DIR}/scripts/${f}"
+  chmod +x "${SKILL_DIR}/scripts/${f}"
+done
+
 echo ""
-echo "Done."
-echo "  Scripts: ${INSTALL_DIR}/scripts/"
-echo "  Skill:   ${SKILL_DIR}/SKILL.md"
+echo "Done. Installed to: ${SKILL_DIR}"
 echo ""
 echo "Restart Claude Code, then run /skill-optimize"
 echo ""
+echo "To undo applied overrides:"
+echo "  python3 ${SKILL_DIR}/scripts/restore.py"
+echo ""
 echo "To uninstall:"
-echo "  rm -rf ${INSTALL_DIR} ${SKILL_DIR}"
+echo "  rm -rf ${SKILL_DIR}"

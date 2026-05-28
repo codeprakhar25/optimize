@@ -213,17 +213,24 @@ def main():
     dead = []
     situational = []
     kept = []
+    plugin_only = []  # plugin skills: skillOverrides has no effect on them
 
     for name in sorted(skills):
+        source = skills[name]
         count = usage.get(name, 0)
-        if name in protected:
-            kept.append({"name": name, "uses": count, "source": skills[name], "protected": True})
+        is_plugin = source.startswith("plugin:")
+
+        if is_plugin:
+            # skillOverrides does not affect plugin skills (docs confirmed); surface separately
+            plugin_only.append({"name": name, "uses": count, "source": source})
+        elif name in protected:
+            kept.append({"name": name, "uses": count, "source": source, "protected": True})
         elif count <= args.dead_threshold:
-            dead.append({"name": name, "uses": count, "source": skills[name]})
+            dead.append({"name": name, "uses": count, "source": source})
         elif count <= args.situational_threshold:
-            situational.append({"name": name, "uses": count, "source": skills[name]})
+            situational.append({"name": name, "uses": count, "source": source})
         else:
-            kept.append({"name": name, "uses": count, "source": skills[name]})
+            kept.append({"name": name, "uses": count, "source": source})
 
     tokens_saved = estimate_tokens(
         [s["name"] for s in dead] + [s["name"] for s in situational],
@@ -236,13 +243,17 @@ def main():
             "dead_count": len(dead),
             "situational_count": len(situational),
             "kept_count": len(kept),
+            "plugin_count": len(plugin_only),
             "estimated_tokens_saved": tokens_saved,
             "dead": dead,
             "situational": situational,
             "kept": kept,
+            "plugin_skills": plugin_only,
         }, indent=2))
     else:
         print(f"Installed skills: {len(skills)}")
+        print(f"  User skills:     {len(skills) - len(plugin_only)}")
+        print(f"  Plugin skills:   {len(plugin_only)} (not controllable via skillOverrides — use /plugin)")
         print(f"Dead (0 uses in {args.days}d):       {len(dead)}")
         print(f"Situational (1-{args.situational_threshold} uses): {len(situational)}")
         print(f"Kept (>{args.situational_threshold} uses):         {len(kept)}")
@@ -254,6 +265,10 @@ def main():
         if situational:
             print("\nSituational skills:")
             for s in situational:
+                print(f"  {s['name']:<40} {s['uses']:>2} uses [{s['source']}]")
+        if plugin_only:
+            print(f"\nPlugin skills (manage via /plugin, not shown above):")
+            for s in sorted(plugin_only, key=lambda x: x["uses"]):
                 print(f"  {s['name']:<40} {s['uses']:>2} uses [{s['source']}]")
 
 

@@ -8,7 +8,7 @@ You are running the `skill-optimize` workflow. Follow these steps exactly.
 ## Step 1 — Run audit
 
 ```
-python3 "~/.local/share/skill-optimize/scripts/audit.py" --days 60 --json
+python3 "${CLAUDE_SKILL_DIR}/scripts/audit.py" --days 60 --json
 ```
 
 Parse the JSON output. It contains:
@@ -31,7 +31,7 @@ Report in this format (no extra prose):
 
 ```
 Skill audit (last 60 days)
-  Installed:     <installed_count>
+  Installed:     <installed_count> (<plugin_count> plugin skills excluded — use /plugin to manage those)
   Dead (→ off):  <dead_count>
   Situational (→ name-only): <situational_count>
   Kept:          <kept_count>
@@ -47,7 +47,7 @@ Then use AskUserQuestion with these options:
 
 Run:
 ```
-python3 "~/.local/share/skill-optimize/scripts/apply.py" --off '<JSON array of dead names>' --name-only '<JSON array of situational names>'
+python3 "${CLAUDE_SKILL_DIR}/scripts/apply.py" --off '<JSON array of dead names>' --name-only '<JSON array of situational names>'
 ```
 
 Pass the exact lists from the audit JSON. Report the backup path and override count from stdout.
@@ -87,7 +87,7 @@ After apply.py succeeds, print:
 Done. Backup: <backup_path>
 <N> overrides written.
 Restart Claude Code to apply changes.
-To undo: python3 "~/.local/share/skill-optimize/scripts/restore.py"
+To undo: python3 "${CLAUDE_SKILL_DIR}/scripts/restore.py"
 ```
 
 ## Rules
