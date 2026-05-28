@@ -1,6 +1,6 @@
 # optimize
 
-A Claude Code plugin that audits your installed skills by session history, classifies unused ones, and prunes them via `skillOverrides` — cutting 8–12k tokens per turn on a typical install.
+A Claude Code skill that audits your installed skills by session history and prunes unused ones via `skillOverrides` — cutting 8–12k tokens per turn on a typical install.
 
 ## The problem
 
@@ -9,13 +9,12 @@ A Claude Code plugin that audits your installed skills by session history, class
 ## Install
 
 ```bash
-claude plugin marketplace add codeprakhar25/optimize
-claude plugin install optimize@codeprakhar25
+curl -fsSL https://raw.githubusercontent.com/codeprakhar25/optimize/main/install.sh | bash
 ```
 
-## Usage
+Restart Claude Code, then run `/skill-optimize`.
 
-In any Claude Code session:
+## Usage
 
 ```
 /skill-optimize
@@ -31,12 +30,18 @@ The skill will:
 ## Undo
 
 ```bash
-python3 ~/.claude/plugins/cache/codeprakhar25/optimize/*/scripts/restore.py
+python3 ~/.local/share/skill-optimize/scripts/restore.py
 ```
 
-Or list backups:
+List available backups:
 ```bash
-python3 ~/.claude/plugins/cache/codeprakhar25/optimize/*/scripts/restore.py --list
+python3 ~/.local/share/skill-optimize/scripts/restore.py --list
+```
+
+## Uninstall
+
+```bash
+rm -rf ~/.local/share/skill-optimize ~/.claude/skills/skill-optimize
 ```
 
 ## Risks

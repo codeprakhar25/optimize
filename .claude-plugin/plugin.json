@@ -1,8 +1,0 @@
-{
-  "name": "optimize",
-  "description": "Audit installed CC skills by usage and prune unused ones via skillOverrides to save tokens.",
-  "author": {
-    "name": "Prakhar Khatri",
-    "url": "https://github.com/codeprakhar25/optimize"
-  }
-}

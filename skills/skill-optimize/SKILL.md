@@ -8,7 +8,7 @@ You are running the `skill-optimize` workflow. Follow these steps exactly.
 ## Step 1 — Run audit
 
 ```
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/audit.py" --days 60 --json
+python3 "~/.local/share/skill-optimize/scripts/audit.py" --days 60 --json
 ```
 
 Parse the JSON output. It contains:
@@ -47,7 +47,7 @@ Then use AskUserQuestion with these options:
 
 Run:
 ```
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/apply.py" --off '<JSON array of dead names>' --name-only '<JSON array of situational names>'
+python3 "~/.local/share/skill-optimize/scripts/apply.py" --off '<JSON array of dead names>' --name-only '<JSON array of situational names>'
 ```
 
 Pass the exact lists from the audit JSON. Report the backup path and override count from stdout.
@@ -87,7 +87,7 @@ After apply.py succeeds, print:
 Done. Backup: <backup_path>
 <N> overrides written.
 Restart Claude Code to apply changes.
-To undo: python3 "${CLAUDE_PLUGIN_ROOT}/scripts/restore.py"
+To undo: python3 "~/.local/share/skill-optimize/scripts/restore.py"
 ```
 
 ## Rules
