@@ -208,12 +208,14 @@ def main():
         return
 
     usage = collect_usage(args.days)
+    has_history = bool(usage)
     protected = load_protected_skills()
 
     dead = []
     situational = []
     kept = []
-    plugin_only = []  # plugin skills: skillOverrides has no effect on them
+    # plugin_id -> {skills: [...], all_dead: bool}
+    plugins: dict = {}
 
     for name in sorted(skills):
         source = skills[name]
@@ -221,8 +223,10 @@ def main():
         is_plugin = source.startswith("plugin:")
 
         if is_plugin:
-            # skillOverrides does not affect plugin skills (docs confirmed); surface separately
-            plugin_only.append({"name": name, "uses": count, "source": source})
+            plugin_id = source.split(":", 1)[1]
+            if plugin_id not in plugins:
+                plugins[plugin_id] = {"skills": [], "plugin_id": plugin_id}
+            plugins[plugin_id]["skills"].append({"name": name, "uses": count})
         elif name in protected:
             kept.append({"name": name, "uses": count, "source": source, "protected": True})
         elif count <= args.dead_threshold:
@@ -232,6 +236,21 @@ def main():
         else:
             kept.append({"name": name, "uses": count, "source": source})
 
+    # classify each plugin: all_dead = every skill has 0 uses
+    plugin_summaries = []
+    for pid, pdata in sorted(plugins.items()):
+        total_uses = sum(s["uses"] for s in pdata["skills"])
+        all_dead = total_uses == 0
+        plugin_summaries.append({
+            "plugin_id": pid,
+            "skill_count": len(pdata["skills"]),
+            "total_uses": total_uses,
+            "all_dead": all_dead,
+            "skills": pdata["skills"],
+        })
+
+    disableable_plugins = [p for p in plugin_summaries if p["all_dead"]]
+
     tokens_saved = estimate_tokens(
         [s["name"] for s in dead] + [s["name"] for s in situational],
         skills
@@ -240,36 +259,43 @@ def main():
     if args.json:
         print(json.dumps({
             "installed_count": len(skills),
+            "has_history": has_history,
             "dead_count": len(dead),
             "situational_count": len(situational),
             "kept_count": len(kept),
-            "plugin_count": len(plugin_only),
+            "plugin_count": sum(len(p["skills"]) for p in plugin_summaries),
+            "disableable_plugin_count": len(disableable_plugins),
             "estimated_tokens_saved": tokens_saved,
             "dead": dead,
             "situational": situational,
             "kept": kept,
-            "plugin_skills": plugin_only,
+            "plugins": plugin_summaries,
+            "disableable_plugins": disableable_plugins,
         }, indent=2))
     else:
+        user_skill_count = len(skills) - sum(len(p["skills"]) for p in plugin_summaries)
         print(f"Installed skills: {len(skills)}")
-        print(f"  User skills:     {len(skills) - len(plugin_only)}")
-        print(f"  Plugin skills:   {len(plugin_only)} (not controllable via skillOverrides — use /plugin)")
+        print(f"  User skills:     {user_skill_count}")
+        print(f"  Plugin skills:   {sum(len(p['skills']) for p in plugin_summaries)} across {len(plugin_summaries)} plugin(s)")
+        if not has_history:
+            print(f"  (No session history found — all skills appear unused. Install age may be <{args.days}d.)")
         print(f"Dead (0 uses in {args.days}d):       {len(dead)}")
         print(f"Situational (1-{args.situational_threshold} uses): {len(situational)}")
         print(f"Kept (>{args.situational_threshold} uses):         {len(kept)}")
         print(f"Est. tokens saved/turn:    ~{tokens_saved}")
         if dead:
-            print("\nDead skills:")
+            print("\nDead user skills:")
             for s in dead:
                 print(f"  {s['name']:<40} [{s['source']}]")
         if situational:
-            print("\nSituational skills:")
+            print("\nSituational user skills:")
             for s in situational:
                 print(f"  {s['name']:<40} {s['uses']:>2} uses [{s['source']}]")
-        if plugin_only:
-            print(f"\nPlugin skills (manage via /plugin, not shown above):")
-            for s in sorted(plugin_only, key=lambda x: x["uses"]):
-                print(f"  {s['name']:<40} {s['uses']:>2} uses [{s['source']}]")
+        if plugin_summaries:
+            print(f"\nPlugins ({len(disableable_plugins)} fully unused, disableable):")
+            for p in plugin_summaries:
+                status = "ALL DEAD — can disable" if p["all_dead"] else f"{p['total_uses']} uses across {p['skill_count']} skills"
+                print(f"  {p['plugin_id']:<45} {status}")
 
 
 if __name__ == "__main__":
