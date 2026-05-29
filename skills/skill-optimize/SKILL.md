@@ -1,6 +1,6 @@
 ---
 name: skill-optimize
-description: Audit CC skills by usage, prune dead ones via skillOverrides. Saves 8-12k tokens/turn. Use for /skill-optimize, "audit skills", "prune unused skills", "optimize skills", "too many skills".
+description: Audit Claude Code skills by usage and reduce per-turn token overhead(~8-12k) with skillOverrides. Use for /skill-optimize, "audit skills", "prune unused skills", "optimize skills", "too many skills".
 ---
 
 You are running the `skill-optimize` workflow. Follow these steps exactly. Do not skip steps.
