@@ -1,32 +1,42 @@
+<div align="center">
+
 # optimize
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-black)](skills/skill-optimize/SKILL.md)
 [![Python](https://img.shields.io/badge/python-3.x-3776AB.svg)](scripts/audit.py)
 [![Install](https://img.shields.io/badge/install-curl%20%7C%20bash-2ea44f.svg)](#install)
+[![No deps](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](#requirements)
+[![Works offline](https://img.shields.io/badge/runs-100%25%20local-lightgrey.svg)](#safety)
 
-Reduce Claude Code token overhead by auditing your installed skills, finding the ones you rarely use, and safely moving them to `name-only` or `off`.
+**Hit Claude Code's usage limits less often by cutting dead-weight skill context from every prompt.**
 
-`optimize` is a Claude Code skill that keeps your skills installed, but trims how much unused skill context gets injected into every turn. Less repeated context means fewer wasted tokens, which can help your usage last longer before you run into usage limits.
+Every installed skill injects its description into every turn — even skills you haven't touched in months. `/skill-optimize` scans your session history, finds unused skills, and quietly mutes them. Fewer wasted tokens per turn means your daily usage limit goes further.
+
+</div>
 
 ## Demo
 
-![Sanitized terminal demo of optimize usage](assets/demo.gif)
+<div align="center">
 
-The recording uses sample output and shows both prompts: applying the user-skill patch, then deciding whether to disable an unused plugin. No local Claude Code history or prompts are shown.
+![Terminal demo of skill-optimize — audit, confirm, and disable an unused plugin](assets/demo.gif)
+
+</div>
+
+Sample output — shows the full flow: Phase 1 (user skills) with confirmation prompt, then Phase 2 (plugins) with per-plugin confirmation. No real `~/.claude` data shown.
 
 ## Why this exists
 
-Claude Code skills are useful, but every installed skill can add metadata to the model context. As your skill library grows, unused or rarely used skills can quietly spend tokens on every prompt.
+Every Claude Code skill adds its description to the model context on every turn. You pay that token cost whether or not you use the skill. With a handful of skills the overhead is negligible — but as your library grows, unused skills quietly spend hundreds or thousands of tokens on every single prompt, pushing you toward your usage limit faster.
 
 `optimize` helps you answer:
 
 - Which skills have I actually used recently?
-- Which skills can be hidden from the prompt without uninstalling them?
-- How many tokens could I save per turn?
-- Which plugin skills appear unused and may be worth disabling separately?
+- Which can be hidden without uninstalling them?
+- How many tokens am I wasting per turn?
+- Which plugin skills appear completely unused?
 
-Your savings depend on how many skills you have installed and how large their descriptions are. Small setups may save very little. Larger skill-heavy setups can save thousands of tokens per turn.
+Savings depend on your skill count and description sizes. Even a modest trim can meaningfully extend how long your daily limit lasts.
 
 ## How it works
 
@@ -157,17 +167,19 @@ Use the manual flow when you already know which skill to change. Use `/skill-opt
 
 ## Risks and Limits
 
-`optimize` is useful, but it is still an audit based on detectable usage. Review the recommendations before applying them.
+The audit is based on detectable usage — slash commands and Skill tool calls found in your session history. Review recommendations before applying.
 
-| Risk | What it means | How to handle it |
-| --- | --- | --- |
-| Implicit usage may be missed | Claude may use a skill because its description matched your prompt, without an obvious slash command in history | Keep borderline skills as `name-only`, or exclude them during review |
-| Fresh installs have weak history | If you recently started using Claude Code, many skills may look unused | Wait a few days or review each recommendation carefully |
-| Plugin disables are broader | Disabling a plugin can remove all of its skills and agents from context | Plugin changes are shown separately and require separate confirmation |
-| Local prompts are scanned | The audit reads local session `.jsonl` files that may include your prompts | Processing stays local and no network calls are made |
-| Token savings are estimates | Savings are calculated from skill names and descriptions, not from Claude's exact internal tokenizer | Treat the number as a directional estimate |
+**Implicit usage may be missed.** If Claude invoked a skill automatically (its description matched your prompt) without an explicit slash command, the audit counts it as zero. Keep borderline skills at `name-only` rather than `off`.
 
-If a skill you need becomes hidden, restore from backup or turn it back on with `/skills`.
+**Fresh installs have thin history.** If you've barely used Claude Code yet, everything looks unused. Wait a few days, then re-run.
+
+**Plugin disables are broader.** Turning off a plugin removes *all* its skills and agents — not just one. Plugin changes are always shown separately and need their own confirmation.
+
+**Token savings are estimates.** Calculated from description lengths, not Claude's internal tokenizer. Treat the number as a directional guide, not an exact figure.
+
+**Your prompts are read locally.** The audit reads `.jsonl` session files on disk. Nothing is sent anywhere — all processing stays on your machine.
+
+If a skill you need becomes hidden, restore from backup or re-enable it with `/skills`.
 
 ## Uninstall
 
