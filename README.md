@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/python-3.x-3776AB.svg)](scripts/audit.py)
 [![Install](https://img.shields.io/badge/install-curl%20%7C%20bash-2ea44f.svg)](#install)
 [![No deps](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](#requirements)
-[![Works offline](https://img.shields.io/badge/runs-100%25%20local-lightgrey.svg)](#safety)
+[![Available on CodeGuilds](https://img.shields.io/badge/Available_on-CodeGuilds-6366f1)](https://codeguilds.dev/packages/optimize)
 
 **Hit Claude Code's usage limits less often by cutting dead-weight skill context from every prompt.**
 
